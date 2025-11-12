@@ -1,0 +1,63 @@
+{
+  "patches": [
+    {
+      "name": "_meta",
+      "filename": "_meta.lua",
+      "md5": "f5615a274060ed86abdee919675c9372"
+    },
+    {
+      "name": "config",
+      "filename": "config.lua",
+      "description": "Default list of patch repositories",
+      "md5": "13c03c3787cabf196e19eb2383450267"
+    },
+    {
+      "name": "main",
+      "filename": "main.lua",
+      "description": "Clear cache",
+      "md5": "0e07bb7b46194d15d6752d68d95ae4e6"
+    },
+    {
+      "name": "patch_descriptions",
+      "filename": "patch_descriptions.lua",
+      "description": "Path to local descriptions file",
+      "md5": "0cbbff2a0813f08e22b9b309e318c29f"
+    },
+    {
+      "name": "patch_manager",
+      "filename": "patch_manager.lua",
+      "description": "Local variable to store injected Utils (for subprocess compatibility)",
+      "md5": "e4f2a40a6d3100aeb902a01baf9b7c28"
+    },
+    {
+      "name": "plugin_manager",
+      "filename": "plugin_manager.lua",
+      "description": "Path to plugins directory",
+      "md5": "c317780d913ba34432df7b137e09b958"
+    },
+    {
+      "name": "repository_manager",
+      "filename": "repository_manager.lua",
+      "description": "Local variable to store injected Utils (for subprocess compatibility)",
+      "md5": "7f891b39db4fbb8d9b21612ea3dda767"
+    },
+    {
+      "name": "ui_manager",
+      "filename": "ui_manager.lua",
+      "description": "Show info message",
+      "md5": "10ac06a345abf25cf0f64ed700df327f"
+    },
+    {
+      "name": "updatesmanager_gettext",
+      "filename": "updatesmanager_gettext.lua",
+      "description": "Simply return the gettext module, which is callable as a function This matches the pattern used in other plugins like imagebookmarks",
+      "md5": "ab5cfae838aa6d24c876ce46fcde3f60"
+    },
+    {
+      "name": "utils",
+      "filename": "utils.lua",
+      "description": "Make HTTP GET request and return response",
+      "md5": "cd6db79db23c5e09baff402140fb254d"
+    }
+  ]
+}
