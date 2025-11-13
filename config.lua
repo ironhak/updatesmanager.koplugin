@@ -138,6 +138,11 @@ Config.DEFAULT_PLUGIN_REPOS = {
         description = "Reader Menu Redesign plugin",
     },
     {
+        owner = "kristianpennacchia",
+        repo = "wordreference.koplugin",
+        description = "WordReference plugin",
+    },
+    {
         owner = "patelneeraj",
         repo = "filebrowserplus.koplugin",
         description = "File Browser Plus plugin",
