@@ -58,13 +58,6 @@ Config.DEFAULT_PATCH_REPOS = {
         owner = "loeffner",
         repo = "KOReader.patches",
         branch = "main",
-        path = "collection", -- patches in subfolder
-        description = "Loeffner's collection patches",
-    },
-    {
-        owner = "loeffner",
-        repo = "KOReader.patches",
-        branch = "main",
         path = "project-title", -- patches in subfolder
         description = "Loeffner's project-title patches",
     },
