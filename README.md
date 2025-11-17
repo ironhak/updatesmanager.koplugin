@@ -27,7 +27,7 @@ Updates Manager is a plugin for KOReader that helps you manage updates for patch
 <a id="installation"></a>
 ## Installation
 
-1. Download the latest release from the [Releases](https://github.com/YOUR_USERNAME/updatesmanager.koplugin/releases) page
+1. Download the latest release from the [Releases](https://github.com/advokatb/updatesmanager.koplugin/releases) page
 2. Extract the `updatesmanager.koplugin` folder to your KOReader `plugins` directory
 3. Restart KOReader
 
