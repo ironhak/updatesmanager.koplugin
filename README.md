@@ -1,5 +1,7 @@
 # Updates Manager Plugin for KOReader
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/advokatb/updatesmanager.koplugin?style=for-the-badge&color=orange) ![GitHub all releases](https://img.shields.io/github/downloads/advokatb/updatesmanager.koplugin/total?style=for-the-badge&color=yellow) ![Platform](https://img.shields.io/badge/Platform-KOReader-success?style=for-the-badge&logo=koreader)
+
 Updates Manager is a plugin for KOReader that helps you manage updates for patches and plugins from multiple GitHub repositories.
 
 <a id="features"></a>
