@@ -127,11 +127,11 @@ Config.DEFAULT_PLUGIN_REPOS = {
         repo = "crashlog.koplugin",
         description = "Crash Log plugin",
     },
-    {
-        owner = "kodermike",
-        repo = "airplanemode.koplugin",
-        description = "Airplane Mode plugin",
-    },
+    -- {
+    --     owner = "kodermike",
+    --     repo = "airplanemode.koplugin",
+    --     description = "Airplane Mode plugin",
+    -- },
     {
         owner = "kristianpennacchia",
         repo = "zzz-readermenuredesign.koplugin",
