@@ -96,7 +96,44 @@ Config.DEFAULT_PATCH_REPOS = {
         path = "",
         description = "Reuerendo's patches",
     },
+    {
+        owner = "sparklerfish",
+        repo = "KOReader.patches",
+        branch = "main",
+        path = "",
+        description = "Sparklerfish's patches",
+    },
+    {
+        owner = "brugsbells",
+        repo = "Koreader-Patches",
+        branch = "main",
+        path = "",
+        description = "Brugsbells's patches",
+    },
+    {
+        owner = "de3sw2aq1",
+        repo = "koreader-patches",
+        branch = "main",
+        path = "patches",
+        description = "De3sw2aq1's patches",
+    },
+    {
+        owner = "0zd3m1r",
+        repo = "KOReader.patches",
+        branch = "main",
+        path = "",
+        description = "0zd3m1r patches",
+    },
 }
+
+-- Commented out patch repositories (no proper releases or structure)
+-- {
+--     owner = "VeeBui",
+--     repo = "KOReader-patches",
+--     branch = "main",
+--     path = "",
+--     description = "VeeBui's patches",
+-- },
 
 -- Default list of plugin repositories
 Config.DEFAULT_PLUGIN_REPOS = {
@@ -190,6 +227,11 @@ Config.DEFAULT_PLUGIN_REPOS = {
         repo = "nonogram.koplugin",
         description = "Nonogram plugin",
     },
+    {
+        owner = "Evgeniy-94",
+        repo = "TelegramDownloader.koplugin",
+        description = "Telegram Downloader plugin",
+    },
     -- {
     --     owner = "joshuacant",
     --     repo = "ProjectTitle",
@@ -232,11 +274,6 @@ Config.DEFAULT_PLUGIN_REPOS = {
     --     description = "Multiline TOC plugin",
     -- },
     -- {
-    --     owner = "Evgeniy-94",
-    --     repo = "TelegramDownloader.koplugin",
-    --     description = "Telegram Downloader plugin",
-    -- },
-    -- {
     --     owner = "greywolf1499",
     --     repo = "opds_plus.koplugin",
     --     description = "OPDS Plus plugin",
@@ -251,6 +288,41 @@ Config.DEFAULT_PLUGIN_REPOS = {
     --     repo = "koreader-syncthing",
     --     description = "Syncthing plugin",
     -- },
+    -- {
+    --     owner = "KORComic",
+    --     repo = "comicreader.koplugin",
+    --     description = "Comic Reader plugin",
+    -- },
+    -- {
+    --     owner = "OGKevin",
+    --     repo = "kobo.koplugin",
+    --     description = "Kobo plugin",
+    -- },
+    -- {
+    --     owner = "KORComic",
+    --     repo = "comicmeta.koplugin",
+    --     description = "Comic Meta plugin",
+    -- },
+    -- {
+    --     owner = "moritz-john",
+    --     repo = "homeassistant.koplugin",
+    --     description = "Home Assistant plugin",
+    -- },
+    -- {
+    --     owner = "TomasDiLeo",
+    --     repo = "sumpuzzle.koplugin",
+    --     description = "Sum Puzzle plugin",
+    -- },
+    -- {
+    --     owner = "m1khal3v",
+    --     repo = "koreader-pinlock",
+    --     description = "PIN Lock plugin",
+    -- },
+    -- {
+    --     owner = "juancoquet",
+    --     repo = "highlights-screensaver",
+    --     description = "Highlights Screensaver plugin",
+    -- },
 }
 
 -- Paths
@@ -262,6 +334,7 @@ Config.CACHE_FILE = Config.CACHE_DIR .. "/repository_cache.json"
 Config.PLUGIN_CACHE_FILE = Config.CACHE_DIR .. "/plugin_cache.json"
 Config.PATCH_DESCRIPTIONS_FILE = DataStorage:getSettingsDir() .. "/updatesmanager_patch_descriptions.json"
 Config.IGNORED_PATCHES_FILE = DataStorage:getSettingsDir() .. "/updatesmanager_ignored_patches.txt"
+Config.GITHUB_TOKEN_FILE = DataStorage:getSettingsDir() .. "/updatesmanager_github_token.txt"
 
 -- Default plugins that come with KOReader (should be hidden from installed plugins list)
 Config.DEFAULT_PLUGINS = {
@@ -342,6 +415,82 @@ function Config.loadRepositories()
     end
 
     return repos
+end
+
+-- Load GitHub Personal Access Token from config file
+function Config.loadGitHubToken()
+    local token_file = io.open(Config.GITHUB_TOKEN_FILE, "r")
+    if not token_file then
+        -- Try to create template file if it doesn't exist
+        Config.createGitHubTokenTemplate()
+        return nil
+    end
+    
+    -- Read all lines and find first non-comment, non-empty line
+    for line in token_file:lines() do
+        -- Trim whitespace
+        line = line:match("^%s*(.-)%s*$")
+        -- Skip empty lines and comments
+        if line and line ~= "" and not line:match("^#") then
+            token_file:close()
+            return line
+        end
+    end
+    
+    token_file:close()
+    return nil
+end
+
+-- Create GitHub token template file if it doesn't exist
+function Config.createGitHubTokenTemplate()
+    -- Check if file already exists
+    if lfs.attributes(Config.GITHUB_TOKEN_FILE, "mode") == "file" then
+        return
+    end
+    
+    -- Ensure settings directory exists
+    local settings_dir = DataStorage:getSettingsDir()
+    if lfs.attributes(settings_dir, "mode") ~= "directory" then
+        lfs.mkdir(settings_dir)
+    end
+    
+    -- Create template file with instructions
+    local template_content = [[# GitHub Personal Access Token Configuration
+# This file is used to store your GitHub Personal Access Token to avoid API rate limits.
+#
+# HOW TO GET A TOKEN:
+# 1. Go to https://github.com/settings/tokens
+# 2. Click "Generate new token" -> "Generate new token (classic)"
+# 3. Give it a name (e.g., "KOReader Updates Manager")
+# 4. Select expiration (recommended: 90 days or custom)
+# 5. For scopes, you only need "public_repo" (read-only access to public repositories)
+# 6. Click "Generate token"
+# 7. Copy the token and paste it below (replace this entire line with your token)
+#
+# WHY USE A TOKEN:
+# - Without a token: 60 requests/hour (shared limit for all unauthenticated requests)
+# - With a token: 5,000 requests/hour (personal limit)
+# - This prevents "403 Rate limit exceeded" errors when checking for updates
+#
+# SECURITY NOTE:
+# - This token only needs "public_repo" scope (read-only access to public repositories)
+# - Never share this token or commit it to version control
+# - If your token is compromised, revoke it immediately at https://github.com/settings/tokens
+#
+# USAGE:
+# - Remove the "#" from the line below and paste your token
+# - Or simply paste your token on a new line (without "#")
+# - The plugin will automatically read the first non-comment line
+#
+# Paste your token here (remove this comment line):
+
+]]
+    
+    local file = io.open(Config.GITHUB_TOKEN_FILE, "w")
+    if file then
+        file:write(template_content)
+        file:close()
+    end
 end
 
 -- Save custom repository list to config file

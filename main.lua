@@ -19,6 +19,19 @@ local UIManager_Updates = require("ui_manager")
 local _ = require("updatesmanager_gettext")
 local T = require("ffi/util").template
 
+-- Cache for GitHub token (loaded once per session)
+local cached_token = nil
+
+-- Load GitHub token (with caching)
+local function getGitHubToken()
+    if cached_token ~= nil then
+        return cached_token
+    end
+    
+    cached_token = Config.loadGitHubToken()
+    return cached_token
+end
+
 local UpdatesManager = WidgetContainer:extend {
     name = "updatesmanager",
     is_doc_only = false,
@@ -27,6 +40,9 @@ local UpdatesManager = WidgetContainer:extend {
 function UpdatesManager:init()
     -- Load configuration
     self.repositories = Config.loadRepositories()
+    
+    -- Create GitHub token template file if it doesn't exist
+    Config.createGitHubTokenTemplate()
 
     if self.ui and self.ui.menu then
         self.ui.menu:registerToMainMenu(self)
@@ -90,6 +106,14 @@ function UpdatesManager:checkForUpdates(force_refresh)
             headers = headers or {}
             headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
             headers["Accept"] = headers["Accept"] or "application/json"
+            
+            -- Add GitHub token if available and URL is GitHub API
+            if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") then
+                local token = getGitHubToken()
+                if token then
+                    headers["Authorization"] = "token " .. token
+                end
+            end
 
             local response_body = {}
             socketutil:set_timeout(socketutil.LARGE_BLOCK_TIMEOUT, socketutil.LARGE_TOTAL_TIMEOUT)
@@ -129,6 +153,14 @@ function UpdatesManager:checkForUpdates(force_refresh)
         local function downloadFile(url, local_path, headers)
             headers = headers or {}
             headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
+            
+            -- Add GitHub token if available and URL is GitHub
+            if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") or url:match("github%.com") then
+                local token = getGitHubToken()
+                if token then
+                    headers["Authorization"] = "token " .. token
+                end
+            end
 
             -- Ensure directory exists
             local dir = local_path:match("^(.*)/")
@@ -1453,6 +1485,14 @@ function UpdatesManager:checkForPatchUpdates(force_refresh)
             headers = headers or {}
             headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
             headers["Accept"] = headers["Accept"] or "application/json"
+            
+            -- Add GitHub token if available and URL is GitHub API
+            if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") then
+                local token = getGitHubToken()
+                if token then
+                    headers["Authorization"] = "token " .. token
+                end
+            end
 
             local response_body = {}
             socketutil:set_timeout(socketutil.LARGE_BLOCK_TIMEOUT, socketutil.LARGE_TOTAL_TIMEOUT)
@@ -2089,6 +2129,14 @@ function UpdatesManager:checkForPluginUpdates(force_refresh)
             headers = headers or {}
             headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
             headers["Accept"] = headers["Accept"] or "application/json"
+            
+            -- Add GitHub token if available and URL is GitHub API
+            if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") then
+                local token = getGitHubToken()
+                if token then
+                    headers["Authorization"] = "token " .. token
+                end
+            end
 
             local response_body = {}
             socketutil:set_timeout(socketutil.LARGE_BLOCK_TIMEOUT, socketutil.LARGE_TOTAL_TIMEOUT)

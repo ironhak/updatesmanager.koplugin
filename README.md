@@ -490,6 +490,30 @@ To add custom repositories, edit the configuration file manually. The plugin wil
 - Automatic detection and handling of 403/429 errors
 - Graceful degradation when rate limits are hit
 
+#### GitHub Personal Access Token (Recommended)
+
+To avoid API rate limits, you can configure a GitHub Personal Access Token:
+
+**Without token**: 60 requests/hour (shared limit for all unauthenticated requests)  
+**With token**: 5,000 requests/hour (personal limit)
+
+**How to set up:**
+
+1. The plugin automatically creates a template file on first launch: `KOReader/settings/updatesmanager_github_token.txt`
+2. Go to https://github.com/settings/tokens
+3. Click "Generate new token" → "Generate new token (classic)"
+4. Give it a name (e.g., "KOReader Updates Manager")
+5. Select expiration (recommended: 90 days or custom)
+6. For scopes, you only need **`public_repo`** (read-only access to public repositories)
+7. Click "Generate token"
+8. Copy the token and paste it in `updatesmanager_github_token.txt` (on a new line, without `#`)
+9. The plugin will automatically use the token for all GitHub API requests
+
+**Security Note:**
+- The token only needs `public_repo` scope (read-only access to public repositories)
+- Never share this token or commit it to version control
+- If your token is compromised, revoke it immediately at https://github.com/settings/tokens
+
 <a id="file-locations"></a>
 ### File Locations
 
@@ -497,6 +521,7 @@ To add custom repositories, edit the configuration file manually. The plugin wil
 - **Cache**: `KOReader/settings/updatesmanager_cache/`
 - **Local Descriptions**: `KOReader/settings/updatesmanager_patch_descriptions.json`
 - **Ignored Patches**: `KOReader/settings/updatesmanager_ignored_patches.txt`
+- **GitHub Token**: `KOReader/settings/updatesmanager_github_token.txt` (auto-created on first launch)
 - **Patches**: `KOReader/patches/`
 - **Plugins**: `KOReader/plugins/`
 

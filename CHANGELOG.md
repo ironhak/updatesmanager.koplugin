@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0] - 2025-01-XX
+
+### Added
+- **GitHub Personal Access Token Support**: Added support for GitHub Personal Access Token to avoid API rate limits
+  - Without token: 60 requests/hour (shared limit for all unauthenticated requests)
+  - With token: 5,000 requests/hour (personal limit)
+  - Token configuration file: `KOReader/settings/updatesmanager_github_token.txt`
+  - Template file is automatically created on first plugin launch with detailed instructions
+  - Token is automatically used for all GitHub API requests when configured
+  - Only requires `public_repo` scope (read-only access to public repositories)
+- Added `de3sw2aq1/koreader-patches` to default patch repositories (patches in `patches/` subfolder).
+- Added `0zd3m1r/KOReader.patches` to default patch repositories.
+- Added `TelegramDownloader.koplugin` back to active plugin repositories (moved from commented-out list).
+
 ## [1.0.7] - 2025-01-XX
 
 ### Fixed

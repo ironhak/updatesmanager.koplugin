@@ -13,12 +13,34 @@ local socketutil = require("socketutil")
 local socket = require("socket")
 
 local Utils = {}
+local Config = require("plugins.updatesmanager.koplugin.config")
+
+-- Cache for GitHub token (loaded once per session)
+local cached_token = nil
+
+-- Load GitHub token (with caching)
+local function getGitHubToken()
+    if cached_token ~= nil then
+        return cached_token
+    end
+    
+    cached_token = Config.loadGitHubToken()
+    return cached_token
+end
 
 -- Make HTTP GET request and return response
 function Utils.httpGet(url, headers)
     headers = headers or {}
     headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
     headers["Accept"] = headers["Accept"] or "application/json"
+    
+    -- Add GitHub token if available and URL is GitHub API
+    if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") then
+        local token = getGitHubToken()
+        if token then
+            headers["Authorization"] = "token " .. token
+        end
+    end
     
     local response_body = {}
     socketutil:set_timeout(socketutil.LARGE_BLOCK_TIMEOUT, socketutil.LARGE_TOTAL_TIMEOUT)
@@ -60,6 +82,14 @@ end
 function Utils.downloadFile(url, local_path, headers)
     headers = headers or {}
     headers["User-Agent"] = headers["User-Agent"] or "KOReader-UpdatesManager/1.0"
+    
+    -- Add GitHub token if available and URL is GitHub
+    if url:match("api%.github%.com") or url:match("raw%.githubusercontent%.com") or url:match("github%.com") then
+        local token = getGitHubToken()
+        if token then
+            headers["Authorization"] = "token " .. token
+        end
+    end
     
     -- Ensure directory exists
     local dir = local_path:match("^(.*)/")
