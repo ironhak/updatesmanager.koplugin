@@ -450,6 +450,12 @@ You can combine both patches and plugins in a single configuration file:
       "owner": "username",
       "repo": "myplugin.koplugin",
       "description": "My custom plugin"
+    },
+    {
+      "owner": "readest",
+      "repo": "readest",
+      "asset_pattern": "*.koplugin.zip",
+      "description": "Readest ebook reader plugin"
     }
   ]
 }
@@ -555,6 +561,11 @@ And the following plugin repositories:
 - 0xmiki/telegramhighlights.koplugin
 - JoeBumm/Koreader-Menu-customizer
 - dani84bs/AnnotationSync.koplugin
+- agaragou/illustrations.koplugin
+- omer-faruq/tbrplanner.koplugin
+- omer-faruq/nonogram.koplugin
+- Evgeniy-94/TelegramDownloader.koplugin
+- readest/readest
 
 </details>
 

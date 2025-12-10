@@ -243,10 +243,40 @@ function PluginManager.checkForUpdates(plugin_repos, installed_plugins, httpGet,
             logger.info("UpdatesManager: Update found for plugin:", matched_name, 
                        "installed:", installed_version, "available:", release_version)
             
-            -- Find ZIP asset
+            -- Find ZIP asset (with optional pattern matching)
             local zip_asset = nil
+            local asset_pattern = repo_config.asset_pattern
+            
+            -- Convert glob-style pattern to Lua pattern if needed
+            -- e.g., "*.koplugin.zip" -> ".*%.koplugin%.zip$"
+            local lua_pattern = nil
+            if asset_pattern then
+                -- Check if pattern already ends with $ (Lua pattern anchor)
+                local ends_with_anchor = asset_pattern:match("%$$")
+                
+                -- Check if pattern contains * (glob-style) or already has escaped dots (Lua pattern)
+                local has_wildcard = asset_pattern:match("%*")
+                local has_escaped_dots = asset_pattern:match("%%.")
+                
+                if has_wildcard and not has_escaped_dots then
+                    -- Glob-style pattern: convert * to .* and escape dots
+                    lua_pattern = asset_pattern:gsub("%.", "%%."):gsub("%*", ".*")
+                else
+                    -- Assume it's already a Lua pattern (or literal string)
+                    lua_pattern = asset_pattern
+                end
+                
+                -- Ensure it matches end of string if no $ at the end
+                if not ends_with_anchor then
+                    lua_pattern = lua_pattern .. "$"
+                end
+            else
+                -- Default: match any .zip file
+                lua_pattern = "%.zip$"
+            end
+            
             for _, asset in ipairs(release_data.assets or {}) do
-                if asset.name:match("%.zip$") then
+                if asset.name:match(lua_pattern) then
                     zip_asset = asset
                     break
                 end
@@ -269,7 +299,8 @@ function PluginManager.checkForUpdates(plugin_repos, installed_plugins, httpGet,
                     },
                 })
             else
-                logger.warn("UpdatesManager: No ZIP asset found for plugin:", matched_name)
+                local pattern_info = asset_pattern and (" (pattern: " .. asset_pattern .. ")") or ""
+                logger.warn("UpdatesManager: No matching asset found for plugin:", matched_name .. pattern_info)
             end
         end
         

@@ -1,6 +1,19 @@
 # Changelog
 
-## [1.1.0] - 2025-01-XX
+## [1.2.0] - 2025-12-XX
+
+### Added
+- **Asset Pattern Filtering**: Added support for `asset_pattern` field in repository configuration to filter release assets by filename pattern
+  - Useful for repositories that release multiple platform-specific files (AppImages, RPMs, DEBs, etc.) alongside plugin ZIPs
+  - Supports glob-style patterns (e.g., `*.koplugin.zip`) which are automatically converted to Lua patterns
+  - Example: `readest/readest` repository can now be configured with `"asset_pattern": "*.koplugin.zip"` to download only the plugin file
+  - If `asset_pattern` is not specified, defaults to matching any `.zip` file (backward compatible)
+- Added `readest/readest` to default plugin repositories (with `asset_pattern` configured).
+
+### Changed
+- Improved plugin name display in update results: now shows full plugin name (`fullname` from `_meta.lua`) instead of technical name (e.g., "Updates Manager" instead of "updatesmanager").
+
+## [1.1.0] - 2025-12-07
 
 ### Added
 - **GitHub Personal Access Token Support**: Added support for GitHub Personal Access Token to avoid API rate limits
@@ -14,7 +27,7 @@
 - Added `0zd3m1r/KOReader.patches` to default patch repositories.
 - Added `TelegramDownloader.koplugin` back to active plugin repositories (moved from commented-out list).
 
-## [1.0.7] - 2025-01-XX
+## [1.0.7] - 2025-12-02
 
 ### Fixed
 - Fixed crash when comparing plugin versions: handle cases where version in `_meta.lua` is stored as a number instead of a string (e.g., `version = 1.0` instead of `version = "1.0.0"`).
@@ -22,7 +35,7 @@
 ### Added
 - Added `reuerendo/koreader-patches` to default patch repositories.
 
-## [1.0.6] - 2025-01-XX
+## [1.0.6] - 2025-12-02
 
 ### Added
 - Added `whatsnewsisyphus/koreader-patches` to default patch repositories.

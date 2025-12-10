@@ -232,6 +232,12 @@ Config.DEFAULT_PLUGIN_REPOS = {
         repo = "TelegramDownloader.koplugin",
         description = "Telegram Downloader plugin",
     },
+    {
+        owner = "readest",
+        repo = "readest",
+        asset_pattern = "*.koplugin.zip",
+        description = "Readest ebook reader plugin",
+    },
     -- {
     --     owner = "joshuacant",
     --     repo = "ProjectTitle",
