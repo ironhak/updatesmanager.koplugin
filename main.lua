@@ -830,7 +830,7 @@ function UpdatesManager:checkForUpdates(force_refresh)
 
         -- Run in subprocess to avoid blocking UI
         local trap_widget = UIManager_Updates.processing_msg
-        local completed, result = Trapper:dismissableRunInSubprocess(function()
+        local trap_result = Trapper:dismissableRunInSubprocess(function()
             -- Create progress callback that writes to file
             local function progressCallback(text)
                 local file = io.open(progress_file, "w")
@@ -846,6 +846,21 @@ function UpdatesManager:checkForUpdates(force_refresh)
             -- Callback for async completion
             handleResult(result)
         end)
+        
+        -- Show trap widget if returned (for proper subprocess handling)
+        if trap_result and trap_result ~= trap_widget then
+            UIManager:show(trap_result)
+        end
+        
+        -- Handle blocking mode (when subprocess didn't work)
+        local completed, result = nil, nil
+        if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+            completed = trap_result.completed
+            result = trap_result.result
+        elseif trap_result == trap_widget then
+            -- Subprocess is running, wait for callback
+            return
+        end
 
         -- If subprocess didn't work (blocking mode), handle result directly
         -- CRITICAL: In blocking mode, UI is frozen, so we MUST schedule result handling
@@ -1126,7 +1141,7 @@ function UpdatesManager:installUpdates(updates)
     end
 
     local trap_widget = UIManager_Updates.processing_msg
-    local completed, results = Trapper:dismissableRunInSubprocess(function()
+    local trap_result = Trapper:dismissableRunInSubprocess(function()
         for i, update in ipairs(updates) do
             local patch_name = update.local_patch.name or update.local_patch.filename
             local ok = installPatch(update)
@@ -1141,6 +1156,21 @@ function UpdatesManager:installUpdates(updates)
         -- Callback for async completion
         handleInstallResults(results)
     end)
+    
+    -- Show trap widget if returned (for proper subprocess handling)
+    if trap_result and trap_result ~= trap_widget then
+        UIManager:show(trap_result)
+    end
+    
+    -- Handle blocking mode (when subprocess didn't work)
+    local completed, results = nil, nil
+    if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+        completed = trap_result.completed
+        results = trap_result.result
+    elseif trap_result == trap_widget then
+        -- Subprocess is running, wait for callback
+        return
+    end
 
     -- If subprocess didn't work (blocking mode), handle result directly
     -- CRITICAL: In blocking mode, UI is frozen, so we MUST schedule result handling
@@ -1360,7 +1390,7 @@ function UpdatesManager:installPluginUpdates(plugin_updates)
     end
 
     local trap_widget = UIManager_Updates.processing_msg
-    local completed, results = Trapper:dismissableRunInSubprocess(function()
+    local trap_result = Trapper:dismissableRunInSubprocess(function()
         for i, update in ipairs(plugin_updates) do
             local plugin_name = update.installed_plugin.name or "unknown"
             local ok = installPlugin(update)
@@ -1375,6 +1405,21 @@ function UpdatesManager:installPluginUpdates(plugin_updates)
         -- Callback for async completion
         handleInstallResults(results)
     end)
+    
+    -- Show trap widget if returned (for proper subprocess handling)
+    if trap_result and trap_result ~= trap_widget then
+        UIManager:show(trap_result)
+    end
+    
+    -- Handle blocking mode (when subprocess didn't work)
+    local completed, results = nil, nil
+    if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+        completed = trap_result.completed
+        results = trap_result.result
+    elseif trap_result == trap_widget then
+        -- Subprocess is running, wait for callback
+        return
+    end
 
     -- If subprocess didn't work (blocking mode), handle result directly
     if completed and results then
@@ -1531,7 +1576,7 @@ function UpdatesManager:installNewPluginsFromDefaultRepos()
         end
 
         local trap_widget = UIManager_Updates.processing_msg
-        local completed, result = Trapper:dismissableRunInSubprocess(function()
+        local trap_result = Trapper:dismissableRunInSubprocess(function()
             local function progressCallback(text)
                 local file = io.open(progress_file, "w")
                 if file then
@@ -1564,6 +1609,21 @@ function UpdatesManager:installNewPluginsFromDefaultRepos()
         end, trap_widget, function(result)
             handleResult(result)
         end)
+        
+        -- Show trap widget if returned (for proper subprocess handling)
+        if trap_result and trap_result ~= trap_widget then
+            UIManager:show(trap_result)
+        end
+        
+        -- Handle blocking mode (when subprocess didn't work)
+        local completed, result = nil, nil
+        if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+            completed = trap_result.completed
+            result = trap_result.result
+        elseif trap_result == trap_widget then
+            -- Subprocess is running, wait for callback
+            return
+        end
 
         if completed and result then
             UIManager:scheduleIn(0.2, function()
@@ -1826,7 +1886,7 @@ function UpdatesManager:installNewPlugins(plugin_candidates)
     end
 
     local trap_widget = UIManager_Updates.processing_msg
-    local completed, results = Trapper:dismissableRunInSubprocess(function()
+    local trap_result = Trapper:dismissableRunInSubprocess(function()
         for _, candidate in ipairs(plugin_candidates) do
             local ok, plugin_or_stub = installNewPlugin(candidate)
             if ok then
@@ -1839,6 +1899,21 @@ function UpdatesManager:installNewPlugins(plugin_candidates)
     end, trap_widget, function(results)
         handleInstallResults(results)
     end)
+    
+    -- Show trap widget if returned (for proper subprocess handling)
+    if trap_result and trap_result ~= trap_widget then
+        UIManager:show(trap_result)
+    end
+    
+    -- Handle blocking mode (when subprocess didn't work)
+    local completed, results = nil, nil
+    if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+        completed = trap_result.completed
+        results = trap_result.result
+    elseif trap_result == trap_widget then
+        -- Subprocess is running, wait for callback
+        return
+    end
 
     if completed and results then
         UIManager:scheduleIn(0.2, function()
@@ -2442,7 +2517,7 @@ function UpdatesManager:checkForPatchUpdates(force_refresh)
         end
 
         local trap_widget = UIManager_Updates.processing_msg
-        local completed, result = Trapper:dismissableRunInSubprocess(function()
+        local trap_result = Trapper:dismissableRunInSubprocess(function()
             local function progressCallback(text)
                 local file = io.open(progress_file, "w")
                 if file then
@@ -2455,6 +2530,21 @@ function UpdatesManager:checkForPatchUpdates(force_refresh)
         end, trap_widget, function(result)
             handleResult(result)
         end)
+        
+        -- Show trap widget if returned (for proper subprocess handling)
+        if trap_result and trap_result ~= trap_widget then
+            UIManager:show(trap_result)
+        end
+        
+        -- Handle blocking mode (when subprocess didn't work)
+        local completed, result = nil, nil
+        if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+            completed = trap_result.completed
+            result = trap_result.result
+        elseif trap_result == trap_widget then
+            -- Subprocess is running, wait for callback
+            return
+        end
 
         if completed and result then
             monitoring_active = false
@@ -2630,7 +2720,7 @@ function UpdatesManager:checkForPluginUpdates(force_refresh)
         end
 
         local trap_widget = UIManager_Updates.processing_msg
-        local completed, result = Trapper:dismissableRunInSubprocess(function()
+        local trap_result = Trapper:dismissableRunInSubprocess(function()
             local function progressCallback(text)
                 local file = io.open(progress_file, "w")
                 if file then
@@ -2665,6 +2755,21 @@ function UpdatesManager:checkForPluginUpdates(force_refresh)
         end, trap_widget, function(result)
             handleResult(result)
         end)
+        
+        -- Show trap widget if returned (for proper subprocess handling)
+        if trap_result and trap_result ~= trap_widget then
+            UIManager:show(trap_result)
+        end
+        
+        -- Handle blocking mode (when subprocess didn't work)
+        local completed, result = nil, nil
+        if trap_result and type(trap_result) == "table" and trap_result.completed ~= nil then
+            completed = trap_result.completed
+            result = trap_result.result
+        elseif trap_result == trap_widget then
+            -- Subprocess is running, wait for callback
+            return
+        end
 
         if completed and result then
             monitoring_active = false

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.1] - 2025-12-22
+
+### Changed
+- **Install New Plugins UI**:
+  - Added pagination to the installable plugins list to avoid huge dialogs and out-of-screen content.
+  - Limit 10 plugins per page with page indicator in the title (e.g. `Page 1/3`).
+  - Navigation buttons (**Previous** / **Next**) to move between pages.
+  - Selections are preserved when switching pages so multiple plugins can be installed in one go.
+
+### Fixed
+- Improved stability of the **Install New Plugins** dialog on Android and desktop:
+  - Avoid creating an excessively large number of widgets at once.
+  - Reduced risk of ANR / “isn't responding” popups and layout issues on macOS.
+
 ## [1.3.0] - 2025-12-17
 
 ### Added

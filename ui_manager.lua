@@ -398,12 +398,20 @@ function UIManager_Updates:showInstallPluginsList(plugin_candidates, callback)
         return
     end
 
-    local checks = {}
-    local plugin_states = {}
+    -- Pagination settings
+    local ITEMS_PER_PAGE = 10
+    local total_items = #plugin_candidates
+    local total_pages = math.ceil(total_items / ITEMS_PER_PAGE)
 
+    -- Prepare all plugin states (persist selections across pages)
+    local plugin_states = {}
     for i, update in ipairs(plugin_candidates) do
         plugin_states[i] = { update = update, selected = false }
+    end
 
+    -- Prepare all checks (for all pages)
+    local all_checks = {}
+    for i, update in ipairs(plugin_candidates) do
         local plugin_name = (update.installed_plugin and (update.installed_plugin.fullname or update.installed_plugin.name)) or (update.repo_config and update.repo_config.repo) or "unknown"
         local author = (update.repo_config and update.repo_config.owner) or "unknown"
         -- Strip trailing "plugin"/"PLUGIN" word from name (purely cosmetic)
@@ -411,9 +419,10 @@ function UIManager_Updates:showInstallPluginsList(plugin_candidates, callback)
 
         local display_text = T(_("%1 (by %2)"), display_name, author)
 
-        table.insert(checks, {
+        table.insert(all_checks, {
             kind = "plugin",
             update = update,
+            index = i,
             config = {
                 text = display_text,
                 checked = false,
@@ -428,24 +437,51 @@ function UIManager_Updates:showInstallPluginsList(plugin_candidates, callback)
         })
     end
 
-    local button_dialog
-    button_dialog = ButtonDialog:new{
-        title = T(_("Install New Plugins (%1)"), #plugin_candidates),
-        buttons = {
+    -- Current page state
+    local current_page = 1
+
+    -- Function to show a specific page
+    local function showPage(page_num)
+        if page_num < 1 or page_num > total_pages then
+            return
+        end
+        current_page = page_num
+
+        -- Close previous dialog if exists
+        if self._install_plugins_dialog then
+            UIManager:close(self._install_plugins_dialog)
+        end
+
+        -- Calculate items for this page
+        local start_idx = (page_num - 1) * ITEMS_PER_PAGE + 1
+        local end_idx = math.min(start_idx + ITEMS_PER_PAGE - 1, total_items)
+        local page_checks = {}
+        for i = start_idx, end_idx do
+            local check = all_checks[i]
+            if check then
+                -- Update checked state from plugin_states
+                check.config.checked = plugin_states[check.index].selected
+                table.insert(page_checks, check)
+            end
+        end
+
+        -- Prepare buttons (main row)
+        local buttons = {
             {
                 {
                     text = _("Cancel"),
                     callback = function()
-                        if button_dialog then
-                            button_dialog:onClose()
+                        if self._install_plugins_dialog then
+                            self._install_plugins_dialog:onClose()
                         end
+                        self._install_plugins_dialog = nil
                     end,
                 },
                 {
                     text = _("Install Selected"),
                     callback = function()
-                        if button_dialog then
-                            button_dialog:onClose()
+                        if self._install_plugins_dialog then
+                            self._install_plugins_dialog:onClose()
                         end
                         local selected = {}
                         for _, state in ipairs(plugin_states) do
@@ -453,32 +489,68 @@ function UIManager_Updates:showInstallPluginsList(plugin_candidates, callback)
                                 table.insert(selected, state.update)
                             end
                         end
+                        self._install_plugins_dialog = nil
                         if callback then
                             callback(selected)
                         end
                     end,
                 },
             },
-        },
-    }
+        }
 
-    -- Add line separator
-    button_dialog:addWidget(LineWidget:new{
-        dimen = Geom:new{
-            w = button_dialog.width - 2 * (Size.border.window + Size.padding.button),
-            h = Size.line.medium,
-        },
-        background = Blitbuffer.COLOR_GRAY,
-    })
-    button_dialog:addWidget(VerticalSpan:new{ width = Size.padding.default })
+        -- Add navigation row if needed
+        if total_pages > 1 then
+            local nav_row = {}
+            if page_num > 1 then
+                table.insert(nav_row, {
+                    text = _("Previous"),
+                    callback = function()
+                        showPage(page_num - 1)
+                    end,
+                })
+            end
+            if page_num < total_pages then
+                table.insert(nav_row, {
+                    text = _("Next"),
+                    callback = function()
+                        showPage(page_num + 1)
+                    end,
+                })
+            end
+            if #nav_row > 0 then
+                table.insert(buttons, nav_row)
+            end
+        end
 
-    for _, check in ipairs(checks) do
-        check.config.parent = button_dialog
-        local check_button = CheckButton:new(check.config)
-        button_dialog:addWidget(self:_buildPluginUpdateRow(button_dialog, check_button, check.update))
+        -- Create dialog for this page
+        local button_dialog = ButtonDialog:new{
+            title = T(_("Install New Plugins (%1) - Page %2/%3"), total_items, page_num, total_pages),
+            buttons = buttons,
+        }
+
+        -- Add line separator
+        button_dialog:addWidget(LineWidget:new{
+            dimen = Geom:new{
+                w = button_dialog.width - 2 * (Size.border.window + Size.padding.button),
+                h = Size.line.medium,
+            },
+            background = Blitbuffer.COLOR_GRAY,
+        })
+        button_dialog:addWidget(VerticalSpan:new{ width = Size.padding.default })
+
+        -- Add checkboxes for this page
+        for _, check in ipairs(page_checks) do
+            check.config.parent = button_dialog
+            local check_button = CheckButton:new(check.config)
+            button_dialog:addWidget(self:_buildPluginUpdateRow(button_dialog, check_button, check.update))
+        end
+
+        self._install_plugins_dialog = button_dialog
+        UIManager:show(button_dialog)
     end
 
-    UIManager:show(button_dialog)
+    -- Show first page
+    showPage(1)
 end
 
 -- Show patch details dialog (for updates)
