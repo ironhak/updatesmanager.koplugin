@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.56] - 2026-01-30
+
+### Added
+- Added new plugings to the default plugin repositories
+
 ## [1.3.5] - 2026-01-06
 
 ### Added

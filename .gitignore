@@ -5,3 +5,4 @@ install_results_debug.json
 updatesmanager_ignored_patches.txt
 *.bak
 updatesmanager_repositories.json
+.specstory/*
